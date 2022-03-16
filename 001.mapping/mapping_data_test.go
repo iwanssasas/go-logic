@@ -6,5 +6,5 @@ import (
 )
 
 func TestMappingData(t *testing.T) {
-	fmt.Println("Hello Word!")
+	fmt.Println("Hello cantik!")
 }
