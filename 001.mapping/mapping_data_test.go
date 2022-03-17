@@ -84,7 +84,6 @@ func TestMappingData(t *testing.T) {
 
 	dest := Response{}
 
-	// tempData := make(map[string]int)
 	tempArea := make(map[string]int)
 	tempSeam := make(map[string]int)
 
@@ -93,34 +92,36 @@ func TestMappingData(t *testing.T) {
 
 		keyArea := val.AreaName
 		keySeam := fmt.Sprintf("%v#%v", val.AreaName, val.SeamName)
+
 		idxArea, hasArea := tempArea[keyArea]
-
-		seamAppend := Seam{
-			Name:  val.SeamName,
-			Value: val.Actual,
-		}
-
 		if hasArea {
 			idxSeam, hasSeam := tempSeam[keySeam]
 			if hasSeam {
 				dest.Data[idxArea].Seam[idxSeam].Value += val.Actual
 			} else {
-				dest.Data[idxArea].Seam = append(dest.Data[idxArea].Seam, seamAppend)
-				tempSeam[keySeam] = len(dest.Data[idxArea].Seam) - 1
+				dest.Data[idxArea].Seam = append(dest.Data[idxArea].Seam, Seam{ // masukkan data seam dalam area yg sudah ada
+					Name:  val.SeamName,
+					Value: val.Actual,
+				})
+				tempSeam[keySeam] = len(dest.Data[idxArea].Seam) - 1 // membuat posisi array seam yg baru aja dimasukkan
 				dest.Summary.Seam++
 			}
 			dest.Data[idxArea].Total += val.Actual
 		} else {
-			dest.Data = append(dest.Data, Data{
+			dest.Data = append(dest.Data, Data{ // masukkan data area belum ada
 				Name: val.AreaName,
-				Seam: Seams{
-					seamAppend,
+				Seam: Seams{ // masukkan data seam dari area yg baru
+					Seam{
+						Name:  val.SeamName,
+						Value: val.Actual,
+					},
 				},
 			})
 
 			idx := len(dest.Data) - 1
-			tempArea[keyArea] = idx
-			tempSeam[keySeam] = len(dest.Data[idx].Seam) - 1
+			tempArea[keyArea] = idx // 0, 1 membuat posisi array area yg baru aja dimasukkan (isi dalam data ada berapa area)
+
+			tempSeam[keySeam] = len(dest.Data[idx].Seam) - 1 // membuat posisi array seam yg baru aja dimasukkan (isi dalam area ada berapa seam)
 			dest.Summary.Seam++
 			dest.Data[idx].Total += val.Actual
 		}
