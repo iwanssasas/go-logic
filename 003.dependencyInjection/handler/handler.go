@@ -68,8 +68,13 @@ func (h handler) GetAllStudents(c *gin.Context) {
 
 func (h handler) DeleteStudents(c *gin.Context) {
 	IdString := c.Param("id")
-	ID := uuid.MustParse(IdString)
 	ctx := context.Background()
+	ID, err := uuid.Parse(IdString)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
 	result, err := h.service.DeleteStudents(ctx, ID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -83,7 +88,11 @@ func (h handler) UpdateStudents(c *gin.Context) {
 	ctx := context.Background()
 	IdString := c.Param("id")
 
-	ID := uuid.MustParse(IdString)
+	ID, err := uuid.Parse(IdString)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 
 	if err := c.ShouldBindJSON(&params); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})

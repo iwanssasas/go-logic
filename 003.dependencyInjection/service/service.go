@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"errors"
+	"fmt"
 	"go-logic/003.dependencyInjection/entity"
 
 	"github.com/google/uuid"
@@ -12,7 +13,7 @@ type Service interface {
 	TestPingService(ctx context.Context) (string, error)
 	AddStudentService(ctx context.Context, params entity.Student) (*uuid.UUID, error)
 	GetStudentService(ctx context.Context) (entity.Students, error)
-	DeleteStudents(ctx context.Context, ID uuid.UUID) (entity.Students, error)
+	DeleteStudents(ctx context.Context, ID uuid.UUID) (*string, error)
 	UpdateStudentService(ctx context.Context, params entity.Student, ID uuid.UUID) (*uuid.UUID, error)
 }
 
@@ -55,19 +56,21 @@ func (s service) GetStudentService(ctx context.Context) (entity.Students, error)
 	for _, val := range database.Data {
 		result = append(result, val)
 	}
-
+	fmt.Println(database.Data)
 	return result, nil
+
 }
 
-func (s service) DeleteStudents(ctx context.Context, ID uuid.UUID) (entity.Students, error) {
-	var result []entity.Student
-	delete(database.Data, ID)
-
-	for _, val := range database.Data {
-		result = append(result, val)
+func (s service) DeleteStudents(ctx context.Context, ID uuid.UUID) (*string, error) {
+	_, hasID := database.Data[ID]
+	if !hasID {
+		return nil, errors.New("ID IS NOT FOUND")
 	}
 
-	return result, nil
+	delete(database.Data, ID)
+
+	response := "success"
+	return &response, nil
 }
 
 func (s service) UpdateStudentService(ctx context.Context, params entity.Student, ID uuid.UUID) (*uuid.UUID, error) {
