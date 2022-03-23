@@ -1,11 +1,15 @@
 package handler
 
 import (
+	"bytes"
 	"context"
+	"encoding/base64"
+	"errors"
 	"go-logic/003.dependencyInjection/entity"
 	"go-logic/003.dependencyInjection/service"
 	"net/http"
 
+	"github.com/360EntSecGroup-Skylar/excelize"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )
@@ -16,6 +20,9 @@ type Handler interface {
 	GetAllStudents(c *gin.Context)
 	DeleteStudents(c *gin.Context)
 	UpdateStudents(c *gin.Context)
+
+	UploadExcel(c *gin.Context)
+	GetUploadExcel(c *gin.Context)
 }
 
 type handler struct {
@@ -104,4 +111,64 @@ func (h handler) UpdateStudents(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"status": result})
+}
+
+func (h handler) UploadExcel(c *gin.Context) {
+	var params entity.UploadExcelModel
+	ctx := context.Background()
+
+	if err := c.ShouldBindJSON(&params); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	file, err := base64.StdEncoding.DecodeString(params.Excel)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, errors.New(""))
+		return
+	}
+
+	r := bytes.NewReader(file)
+	e, err := excelize.OpenReader(r)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, errors.New(""))
+		return
+	}
+
+	dataExcels := e.GetRows("Sheet1")
+	if err != nil {
+		c.JSON(http.StatusBadRequest, errors.New(""))
+		return
+	}
+
+	dataExcels = dataExcels[1:]
+	if len(dataExcels) < 1 {
+		c.JSON(http.StatusBadRequest, errors.New(""))
+		return
+	}
+
+	go func(ctx context.Context, dataExcels [][]string) {
+		err := h.service.UploadExcelService(ctx, dataExcels)
+		if err != nil {
+			panic(err)
+		}
+
+	}(ctx, dataExcels)
+	c.JSON(http.StatusOK, gin.H{
+		"data":  "SUCCES",
+		"error": nil,
+	})
+}
+
+func (h handler) GetUploadExcel(c *gin.Context) {
+	ctx := context.Background()
+	result, err := h.service.GetAllUploadExcel(ctx)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"data":  result,
+		"error": nil,
+	})
 }

@@ -28,4 +28,7 @@ func (r *router) Product() {
 	r.router.GET("/students", r.handler.GetAllStudents)
 	r.router.DELETE("/students/:id", r.handler.DeleteStudents)
 	r.router.PUT("/students/:id", r.handler.UpdateStudents)
+
+	r.router.POST("/excel", r.handler.UploadExcel)
+	r.router.GET("/excel", r.handler.GetUploadExcel)
 }
