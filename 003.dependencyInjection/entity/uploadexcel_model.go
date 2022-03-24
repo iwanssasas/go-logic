@@ -23,6 +23,17 @@ type (
 	UploadExcels []UploadExcelDatabase
 
 	MapUploadExcel map[string]UploadExcelDatabase
+
+	ErrorsExcel struct {
+		Row          int    `json:"row"`
+		ErrorMessage string `json:"error_message"`
+	}
+
+	ErrorsExcels []ErrorsExcel
+	Response     struct {
+		ErrorMessage ErrorsExcels `json:"error_message"`
+		DataExcel    UploadExcels `json:"data_excel"`
+	}
 )
 
 type StringSliceParams [][]string

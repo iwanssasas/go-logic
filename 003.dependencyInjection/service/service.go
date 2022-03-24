@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"go-logic/003.dependencyInjection/entity"
+	"go-logic/003.dependencyInjection/utils"
 	"strconv"
 	"strings"
 	"sync"
@@ -21,7 +22,7 @@ type Service interface {
 	UpdateStudentService(ctx context.Context, params entity.Student, ID uuid.UUID) (*uuid.UUID, error)
 
 	UploadExcelService(ctx context.Context, dataExcel [][]string) error
-	GetAllUploadExcel(ctx context.Context) (entity.UploadExcels, error)
+	GetAllUploadExcel(ctx context.Context) (entity.Response, error)
 }
 
 type service struct {
@@ -111,7 +112,7 @@ func (s service) UploadExcelService(ctx context.Context, dataExcel [][]string) e
 
 	for val := range uploadExcelChan {
 
-		keyMap := fmt.Sprintf("%v", val.ID)
+		keyMap := val.ID.String()
 		mapUploadExcel[keyMap] = val
 	}
 
@@ -124,11 +125,21 @@ func (s service) UploadExcelService(ctx context.Context, dataExcel [][]string) e
 func (s service) upsertExcel(wg *sync.WaitGroup, ir int, row []string, uploadExcelChan chan entity.UploadExcelDatabase) {
 	defer wg.Done()
 	var err error
+	rowPosition := (ir + 2)
 	var uploadExcelDatabase entity.UploadExcelDatabase
+
+	setError := func(errorStr string, colPosition int) {
+		colAlphabet := utils.GetColumnFromInt(colPosition + 1)
+		errorMsg := fmt.Sprintf("%v at %v%v", errorStr, colAlphabet, rowPosition)
+		database.ErrorsExcel = append(database.ErrorsExcel, entity.ErrorsExcel{
+			Row:          rowPosition,
+			ErrorMessage: errorMsg,
+		})
+	}
 
 	isImportant := func(colPosition int, col string) {
 		if col == "" {
-			errors.New("ROW KOSONG")
+			setError("Value is empty", colPosition)
 		}
 	}
 
@@ -157,9 +168,9 @@ func (s service) upsertExcel(wg *sync.WaitGroup, ir int, row []string, uploadExc
 			if err != nil {
 				panic(err)
 			}
-			d := time.Date(1899, 12, 30, 0, 0, 0, 0, time.UTC)
-			d2 := d.AddDate(0, 0, dateInt)
-			uploadExcelDatabase.PublishDate = d2
+
+			dateTime := time.Unix(int64((dateInt-25569)*86400), 0)
+			uploadExcelDatabase.PublishDate = dateTime
 		case 4:
 			isImportant(ic, col)
 			uploadExcelDatabase.Notes = strings.TrimSpace(col)
@@ -176,11 +187,13 @@ func (s service) upsertExcel(wg *sync.WaitGroup, ir int, row []string, uploadExc
 
 }
 
-func (s service) GetAllUploadExcel(ctx context.Context) (entity.UploadExcels, error) {
-	var result []entity.UploadExcelDatabase
+func (s service) GetAllUploadExcel(ctx context.Context) (entity.Response, error) {
+	var result entity.Response
 
 	for _, val := range database.DataExcel {
-		result = append(result, val)
+		result.DataExcel = append(result.DataExcel, val)
 	}
+
+	result.ErrorMessage = append(result.ErrorMessage, database.ErrorsExcel...)
 	return result, nil
 }
