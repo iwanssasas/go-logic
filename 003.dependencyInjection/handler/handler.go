@@ -4,9 +4,9 @@ import (
 	"bytes"
 	"context"
 	"encoding/base64"
-	"errors"
 	"go-logic/003.dependencyInjection/entity"
 	"go-logic/003.dependencyInjection/service"
+	"go-logic/003.dependencyInjection/utils"
 	"net/http"
 
 	"github.com/360EntSecGroup-Skylar/excelize"
@@ -118,32 +118,32 @@ func (h handler) UploadExcel(c *gin.Context) {
 	ctx := context.Background()
 
 	if err := c.ShouldBindJSON(&params); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, utils.ErrorResponse(err))
 		return
 	}
 
 	file, err := base64.StdEncoding.DecodeString(params.Excel)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, errors.New(""))
+		c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
 		return
 	}
 
 	r := bytes.NewReader(file)
 	e, err := excelize.OpenReader(r)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, errors.New(""))
+		c.JSON(http.StatusInternalServerError, utils.ErrorResponse(err))
 		return
 	}
 
 	dataExcels := e.GetRows("Sheet1")
 	if err != nil {
-		c.JSON(http.StatusBadRequest, errors.New(""))
+		c.JSON(http.StatusBadRequest, utils.ErrorResponse(err))
 		return
 	}
 
 	dataExcels = dataExcels[1:]
 	if len(dataExcels) < 1 {
-		c.JSON(http.StatusBadRequest, errors.New(""))
+		c.JSON(http.StatusBadRequest, utils.ErrorResponse(err))
 		return
 	}
 
@@ -164,7 +164,7 @@ func (h handler) GetUploadExcel(c *gin.Context) {
 	ctx := context.Background()
 	result, err := h.service.GetAllUploadExcel(ctx)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, utils.ErrorResponse(err))
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{
