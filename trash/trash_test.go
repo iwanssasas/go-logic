@@ -1,4 +1,5 @@
-package datechallenge
+
+package iwan
 
 import (
 	"fmt"
