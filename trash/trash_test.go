@@ -1,17 +1,32 @@
+
 package iwan
 
 import (
 	"fmt"
 	"testing"
-	"time"
 )
 
-func TestIwan(t *testing.T) {
-	d := time.Date(1899, 12, 30, 0, 0, 0, 0, time.UTC)
-	fmt.Println(d) // 1900-01-01 00:00:00 +0000 UTC
+func TestNumberToAlphabet(t *testing.T) {
+	array := [][]string{{"1", "2", "3", "4"}, {"1", "2", "3", "4", "5", "6", "7"}, {"1", "2", "3", "4", "5", "6", "7"}, {"1", "2", "3", "4", "5", "6", "7"}, {"1", "2"}}
 
-	d2 := d.AddDate(0, 0, 44562)
+	if len(array[0]) <= 4 {
+		array[1] = append(array[1], array[0]...)
+		array = append(array[:0], array[0+1:]...)
+	}
 
-	fmt.Println(d2)
+	lastPosition := len(array) - 1
+	if len(array[lastPosition]) <= 4 {
+		array[lastPosition-1] = append(array[lastPosition-1], array[lastPosition]...)
+		array = append(array[:lastPosition], array[lastPosition+1:]...)
+	}
+
+	a := []int{1, 2, 3}
+	b := []int{5, 6, 7}
+
+	a = append(a, b...)
+	fmt.Println(a)
+
+	fmt.Println(array)
+	fmt.Println(len(array))
 
 }
