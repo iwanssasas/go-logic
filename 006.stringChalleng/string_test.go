@@ -3,7 +3,6 @@ package stringchalleng
 import (
 	"fmt"
 	"regexp"
-	"strconv"
 	"strings"
 	"testing"
 )
@@ -19,40 +18,46 @@ func GetAplhabetAndSplit(input string) []string {
 
 	re := regexp.MustCompile("[^A-Z][^a-z]")
 	strFill := re.ReplaceAllString(input, "")
+	strLower := strings.ToLower(strFill)
 
-	arr := strings.Split(strFill, "")
+	arr := strings.Split(strLower, "")
 
 	return arr
 }
 
 func TestString(t *testing.T) {
 	var dest ArrData
-	var hasil []string
-	input := "123WWWwwwggopp##%^&*><:{}+_)(*&"
+	var hasil string
+	input := "WWWwwwggoppwwwxxxx"
+	str := GetAplhabetAndSplit(input)
+	fmt.Println(str)
 
-	arr := GetAplhabetAndSplit(input)
+	jumlah := 0
 
-	tempMap := make(map[string]int)
-	for _, val := range arr {
-		idx, ok := tempMap[val]
-		if ok {
-			dest[idx].Jumlah++
+	for idx, val := range str {
+		if idx < len(str)-1 {
+			if val != str[idx+1] {
+				jumlah++
+				dest = append(dest, Data{
+					Huruf:  val,
+					Jumlah: jumlah,
+				})
+				jumlah = 0
+			} else {
+				jumlah++
+			}
 		} else {
-
 			dest = append(dest, Data{
 				Huruf:  val,
-				Jumlah: 1,
+				Jumlah: jumlah + 1,
 			})
-
-			tempMap[val] = len(dest) - 1
 		}
 	}
 
 	for _, val := range dest {
-		hasil = append(hasil, strconv.Itoa(val.Jumlah))
-		hasil = append(hasil, val.Huruf)
-
+		strHasil := fmt.Sprintf("%v%v", val.Jumlah, val.Huruf)
+		hasil += strHasil
 	}
 
-	fmt.Println(strings.Join(hasil, ""))
+	fmt.Println(hasil)
 }
