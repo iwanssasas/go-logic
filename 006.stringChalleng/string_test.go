@@ -7,13 +7,6 @@ import (
 	"testing"
 )
 
-type Data struct {
-	Huruf  string
-	Jumlah int
-}
-
-type ArrData []Data
-
 func GetAplhabetAndSplit(input string) []string {
 
 	re := regexp.MustCompile("[^A-Z][^a-z]")
@@ -26,9 +19,8 @@ func GetAplhabetAndSplit(input string) []string {
 }
 
 func TestString(t *testing.T) {
-	var dest ArrData
 	var hasil string
-	input := "WWWwwwggoppwwwxxxx"
+	input := "WWWwwwggoppwwwxxxxaaa"
 	str := GetAplhabetAndSplit(input)
 	fmt.Println(str)
 
@@ -38,25 +30,17 @@ func TestString(t *testing.T) {
 		if idx < len(str)-1 {
 			if val != str[idx+1] {
 				jumlah++
-				dest = append(dest, Data{
-					Huruf:  val,
-					Jumlah: jumlah,
-				})
+				strHasil := fmt.Sprintf("%v%v", jumlah, val)
+				hasil += strHasil
+
 				jumlah = 0
 			} else {
 				jumlah++
 			}
 		} else {
-			dest = append(dest, Data{
-				Huruf:  val,
-				Jumlah: jumlah + 1,
-			})
+			strHasil := fmt.Sprintf("%v%v", jumlah+1, val)
+			hasil += strHasil
 		}
-	}
-
-	for _, val := range dest {
-		strHasil := fmt.Sprintf("%v%v", val.Jumlah, val.Huruf)
-		hasil += strHasil
 	}
 
 	fmt.Println(hasil)

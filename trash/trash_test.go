@@ -1,4 +1,3 @@
-
 package iwan
 
 import (
@@ -7,26 +6,22 @@ import (
 )
 
 func TestNumberToAlphabet(t *testing.T) {
-	array := [][]string{{"1", "2", "3", "4"}, {"1", "2", "3", "4", "5", "6", "7"}, {"1", "2", "3", "4", "5", "6", "7"}, {"1", "2", "3", "4", "5", "6", "7"}, {"1", "2"}}
+	// Example - 1
+	str := "GOLANG"
+	runes := []rune(str)
 
-	if len(array[0]) <= 4 {
-		array[1] = append(array[1], array[0]...)
-		array = append(array[:0], array[0+1:]...)
+	var result []int
+
+	for i := 0; i < len(runes); i++ {
+		result = append(result, int(runes[i]))
 	}
 
-	lastPosition := len(array) - 1
-	if len(array[lastPosition]) <= 4 {
-		array[lastPosition-1] = append(array[lastPosition-1], array[lastPosition]...)
-		array = append(array[:lastPosition], array[lastPosition+1:]...)
+	fmt.Println(result)
+
+	// Example - 2
+	s := "GOLANG"
+	for _, r := range s {
+		fmt.Printf("%c - %d\n", r, r)
 	}
-
-	a := []int{1, 2, 3}
-	b := []int{5, 6, 7}
-
-	a = append(a, b...)
-	fmt.Println(a)
-
-	fmt.Println(array)
-	fmt.Println(len(array))
 
 }
